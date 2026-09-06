@@ -7,8 +7,8 @@ import {
   signal,
   viewChild,
 } from "@angular/core";
-import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { beforeEach, describe, expect, it } from "vitest";
+import { TestBed } from "@angular/core/testing";
+import { describe, expect, it } from "vitest";
 import { CopilotSlot } from "../copilot-slot";
 import { SlotOutputs } from "../slot.types";
 
@@ -50,31 +50,29 @@ class TestHost {
 }
 
 describe("CopilotSlot", () => {
-  let fixture: ComponentFixture<TestHost>;
-  let host: TestHost;
-  let element: HTMLElement;
+  const setup = async () => {
+    const fixture = TestBed.createComponent(TestHost);
+    const host = fixture.componentInstance;
+    const element = fixture.nativeElement as HTMLElement;
+    await fixture.whenStable();
+    return { fixture, host, element };
+  };
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(TestHost);
-    host = fixture.componentInstance;
-    element = fixture.nativeElement;
-  });
-
-  it("renders projected content or the default component", () => {
-    fixture.detectChanges();
+  it("renders projected content or the default component", async () => {
+    const { fixture, host, element } = await setup();
     expect(element.querySelector(".fallback")).not.toBeNull();
 
     host.defaultComponent.set(TestContent);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(element.querySelector("button")?.textContent).toContain("default");
     expect(element.querySelector(".fallback")).toBeNull();
   });
 
-  it("renders a template slot with context", () => {
-    fixture.detectChanges();
+  it("renders a template slot with context", async () => {
+    const { fixture, host, element } = await setup();
     host.slot.set(host.template());
     host.context.set({ label: "template" });
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     expect(element.querySelector(".template")?.textContent).toContain(
       "template",
@@ -82,17 +80,19 @@ describe("CopilotSlot", () => {
     expect(element.querySelector(".fallback")).toBeNull();
   });
 
-  it("binds component inputs and outputs", () => {
+  it("binds component inputs and outputs", async () => {
+    const { fixture, host, element } = await setup();
     let selected: string | undefined;
     host.slot.set(TestContent);
     host.context.set({ label: "component" });
     host.outputs.set({ selected: (value) => (selected = value) });
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     const button = element.querySelector("button") as HTMLButtonElement;
     expect(button.textContent).toContain("component");
 
     button.click();
+    await fixture.whenStable();
     expect(selected).toBe("component");
   });
 });
