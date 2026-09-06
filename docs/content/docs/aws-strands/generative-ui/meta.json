@@ -1,6 +1,0 @@
-{
-  "title": "Generative UI",
-  "icon": "lucide/Paintbrush",
-  "defaultOpen": true,
-  "pages": ["backend-tools", "frontend-tools", "agentic"]
-}
